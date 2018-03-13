@@ -2,7 +2,6 @@
 #define CONTROLLER_HPP
 #include <math.h>
 #include <stdio.h>
-#include "PID.hpp"
 
 class Controller {
 public:
