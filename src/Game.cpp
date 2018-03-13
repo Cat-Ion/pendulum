@@ -7,7 +7,7 @@ Game::Game(Window *w)
       pressing_right(false),
       controller_on(true),
       running(true),
-      center(true)
+      center(false)
 {
 }
 
@@ -17,10 +17,12 @@ void Game::run() {
         handle_input();
         if (running) {
             double f = controller.force( physics.ballAngle(), physics.ballAngularVelocity(), physics.sledX(), physics.sledVelocity() );
+            if(f > 15) f = 15;
+            if(f < -15) f = -15;
             if(pressing_left && !pressing_right) {
-                physics.setForce(-5);
+                physics.setForce(f-5);
             } else if(pressing_right && !pressing_left) {
-                physics.setForce(5);
+                physics.setForce(f+5);
             } else if(controller_on){
                 physics.setForce( f );
             } else {

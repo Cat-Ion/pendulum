@@ -11,7 +11,7 @@ Physics::Physics()
     setBall(M_PI, -0.1);
     setRadius(15);
     setBallMass(0.3);
-    setSledMass(1);
+    setSledMass(10);
 }
 
 void Physics::tick(double dt) {
