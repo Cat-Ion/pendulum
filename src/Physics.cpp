@@ -8,9 +8,15 @@ Physics::Physics()
     : t(0)
 {
     setSled(0, 0);
-    setBall(M_PI, -0.1);
-    setRadius(15);
-    setBallMass(0.3);
+
+    setBall(0, 0., 0);
+    setRadius(0, 1);
+    setBallMass(0, 0.6);
+
+    setBall(1, 0, 0);
+    setRadius(1, 1);
+    setBallMass(1, 0.3);
+
     setSledMass(10);
 }
 
@@ -19,19 +25,33 @@ void Physics::tick(double dt) {
     t += dt;
 }
 
-Physics::Position Physics::ballPosition() const {
+Physics::Position Physics::ballPosition(int index) const {
     Position p = sledPosition();
-    p.x += sin(position[BallAngle]) * params[Radius];
-    p.y += cos(position[BallAngle]) * params[Radius];
+    p.x -= sin(position[Ball1Angle]) * params[Radius1];
+    p.y += cos(position[Ball1Angle]) * params[Radius1];
+    if(index == 1) {
+        p.x -= sin(position[Ball2Angle]) * params[Radius2];
+        p.y += cos(position[Ball2Angle]) * params[Radius2];
+    }
     return p;
 }
 
-double Physics::ballAngle() const {
-    return position[BallAngle];
+double Physics::ballAngle(int index) const {
+    switch(index){
+    case 0:
+        return position[Ball1Angle];
+    case 1:
+        return position[Ball2Angle];
+    }
 }
 
-double Physics::ballAngularVelocity() const {
-    return position[BallVelocity];
+double Physics::ballAngularVelocity(int index) const {
+    switch(index){
+    case 0:
+        return position[Ball1Velocity];
+    case 1:
+        return position[Ball2Velocity];
+    }
 }
 
 Physics::Position Physics::sledPosition() const {
@@ -57,17 +77,39 @@ double Physics::time() const {
     return t;
 }
 
-void Physics::setBall(double angle, double velocity) {
-    this->position[BallAngle] = angle;
-    this->position[BallVelocity] = velocity;
+void Physics::setBall(int index, double angle, double velocity) {
+    switch(index) {
+    case 0:
+        this->position[Ball1Angle] = angle;
+        this->position[Ball1Velocity] = velocity;
+        break;
+    case 1:
+        this->position[Ball2Angle] = angle;
+        this->position[Ball2Velocity] = velocity;
+        break;
+    }
 }
 
-void Physics::setRadius(double radius) {
-    this->params[Radius] = radius;
+void Physics::setRadius(int index, double radius) {
+    switch(index) {
+    case 0:
+        this->params[Radius1] = radius;
+        break;
+    case 1:
+        this->params[Radius2] = radius;
+    }
+
 }
 
-void Physics::setBallMass(double m) {
-    this->params[BallMass] = m;
+void Physics::setBallMass(int index, double m) {
+    switch(index) {
+    case 0:
+        this->params[Ball1Mass] = m;
+        break;
+    case 1:
+        this->params[Ball2Mass] = m;
+        break;
+    }
 }
 
 void Physics::setSledMass(double m) {
@@ -84,20 +126,31 @@ void Physics::setForce(double f) {
 }
 
 void Physics::velocities(double t, double const *params, double const *positions, double *out) {
-    double phi = positions[BallAngle];
-    double dphi = positions[BallVelocity];
+    double M = params[SledMass];
+    double m1 = params[Ball1Mass];
+    double m2 = params[Ball2Mass];
 
-    double mb = params[BallMass];
-    double ms = params[SledMass];
-    double r = params[Radius];
-    double fx = params[ForceX];
+    double l1 = params[Radius1];
+    double l2 = params[Radius2];
 
-    double cp = cos(phi);
-    double sp = sin(phi);
+    double u = params[ForceX];
 
-    out[SledPosition] = positions[SledVelocity];
-    out[BallAngle] = positions[BallVelocity];
+    double x = positions[SledPosition];
+    double dx = positions[SledVelocity];
 
-    out[SledVelocity] = - (fx + cp * g * mb * sp - dphi*dphi * r * mb * sp) / (-mb + cp*cp * mb - ms);
-    out[BallVelocity] = - (-cp * fx - g * mb * sp + cp * dphi*dphi * r * mb * sp - g * ms * sp) / (r * (-mb + cp*cp * mb - ms));
+    double p1 = positions[Ball1Angle];
+    double dp1 = positions[Ball1Velocity];
+
+    double p2 = positions[Ball2Angle];
+    double dp2 = positions[Ball2Velocity];
+
+    out[SledPosition] = dx;
+    out[Ball1Angle] = dp1;
+    out[Ball2Angle] = dp2;
+
+    double d = -(m1 * (2*M+m1) + m2 * (M+m1) - m1 * (m1+m2) * cos(2*p1) - M*m2*cos(2*(p1-p2)));
+
+    out[SledVelocity]  = (-(2*m1+m2)*u + m2*u*cos(2*(p1-p2)) - g*m1*(m1+m2)*sin(2*p1) + 2*m1*sin(p1)*(l1*(m1+m2)*dp1*dp1 + l2*m2*cos(p1-p2)*dp2*dp2)) / d;
+    out[Ball1Velocity] = (-(2*m1+m2)*u*cos(p1) + m2*u*cos(p1-2*p2) - g*(2*m1*(m1+m2)+M*(2*m1+m2))*sin(p1) - g*M*m2*sin(p1-2*p2) + l1*(m1*(m1+m2)*sin(2*p1) + M*m2*sin(2*(p1-p2)))*dp1*dp1 + 2*l2*m2*((M+m1)*cos(p2)*sin(p1) - M*cos(p1)*sin(p2))*dp2*dp2) / l1 / d;
+    out[Ball2Velocity] = (2*sin(p1-p2) * ((m1+m2)*(g*M*cos(p1) - u*sin(p1) - l1*M*dp1*dp1) - l2*M*m2*cos(p1-p2)*dp2*dp2)) / l2 / d;
 }

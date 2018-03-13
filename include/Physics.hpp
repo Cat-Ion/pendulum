@@ -12,32 +12,36 @@ public:
     };
 
     enum {
-        Radius,
-        BallMass,
+        Radius1,
+        Ball1Mass,
+        Radius2,
+        Ball2Mass,
         SledMass,
         ForceX,
         ParCount
     };
     enum {
-        BallAngle,
-        BallVelocity,
+        Ball1Angle,
+        Ball1Velocity,
+        Ball2Angle,
+        Ball2Velocity,
         SledPosition,
         SledVelocity,
         VarCount
     };
 
-    void setRadius(double radius);
+    void setRadius(int index, double radius);
     void setSled(double position, double velocity);
-    void setBall(double angle, double velocity);
+    void setBall(int index, double angle, double velocity);
 
-    void setBallMass(double m);
+    void setBallMass(int index, double m);
     void setSledMass(double m);
 
     void setForce(double f);
 
-    Position ballPosition() const;
-    double ballAngle() const;
-    double ballAngularVelocity() const;
+    Position ballPosition(int index) const;
+    double ballAngle(int index) const;
+    double ballAngularVelocity(int index) const;
     Position sledPosition() const;
     double sledX() const;
     double sledVelocity() const;

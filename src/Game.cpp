@@ -6,27 +6,32 @@ Game::Game(Window *w)
       pressing_left(false),
       pressing_right(false),
       controller_on(true),
-      running(true),
+      running(false),
       center(false)
 {
 }
 
 void Game::run() {
     quit = false;
+    double const max_force = 100;
     while(!quit) {
         handle_input();
         if (running) {
-            double f = controller.force( physics.ballAngle(), physics.ballAngularVelocity(), physics.sledX(), physics.sledVelocity() );
-            if(f > 15) f = 15;
-            if(f < -15) f = -15;
+            double f = 0;
+            if(controller_on) {
+                f = controller.force(
+                        physics.ballAngle(0), physics.ballAngularVelocity(0),
+                        physics.ballAngle(1), physics.ballAngularVelocity(1),
+                        physics.sledX(), physics.sledVelocity() );
+                if(f > max_force) f = max_force;
+                if(f < -max_force) f = -max_force;
+            }
             if(pressing_left && !pressing_right) {
                 physics.setForce(f-10);
             } else if(pressing_right && !pressing_left) {
                 physics.setForce(f+10);
-            } else if(controller_on){
-                physics.setForce( f );
             } else {
-                physics.setForce(0);
+                physics.setForce(f);
             }
 
             physics.tick(1./60);
@@ -34,7 +39,9 @@ void Game::run() {
         window->clear();
         window->draw_line(0, window->height()/2, window->width(), window->height()/2);
 
-        double scale = 5;
+        double scale = 50;
+        double ballRadius = 0.1;
+        double cartLength = 0.1;
         if(!center) {
             while (fabs(physics.sledX() * scale) >= window->width()/2) {
                 scale *= 0.5;
@@ -51,20 +58,30 @@ void Game::run() {
         }
 
         Physics::Position sledPosition = physics.sledPosition();
-        Physics::Position s = physics.ballPosition();
+        Physics::Position s0 = physics.ballPosition(0);
+        Physics::Position s1 = physics.ballPosition(1);
         if(center) {
-            s.x -= sledPosition.x;
-            s.y -= sledPosition.y;
+            s0.x -= sledPosition.x;
+            s0.y -= sledPosition.y;
+
+            s1.x -= sledPosition.x;
+            s1.y -= sledPosition.y;
+
             sledPosition.x = sledPosition.y = 0;
         }
 
         sledPosition = scale_position(sledPosition, scale);
-        s = scale_position(s, scale);
+        s0 = scale_position(s0, scale);
+        s1 = scale_position(s1, scale);
 
-        window->draw_rectangle(sledPosition.x - 2*scale, sledPosition.y - 2*scale, sledPosition.x + 2*scale, sledPosition.y + 2*scale);
-        window->draw_circle(s.x, s.y, 1*scale);
+        window->draw_rectangle(sledPosition.x - cartLength/2*scale, sledPosition.y - cartLength/2*scale + 100, sledPosition.x + cartLength/2*scale, sledPosition.y + cartLength/2*scale + 100);
 
-        window->draw_line(sledPosition.x, sledPosition.y, s.x, s.y);
+        window->draw_rectangle(sledPosition.x - cartLength/2*scale, sledPosition.y - cartLength/2*scale, sledPosition.x + cartLength/2*scale, sledPosition.y + cartLength/2*scale);
+        window->draw_circle(s0.x, s0.y, ballRadius*scale);
+        window->draw_circle(s1.x, s1.y, ballRadius*scale);
+
+        window->draw_line(sledPosition.x, sledPosition.y, s0.x, s0.y);
+        window->draw_line(s1.x, s1.y, s0.x, s0.y);
         window->draw();
     }
 }
@@ -104,7 +121,7 @@ void Game::handle_input() {
 
 Physics::Position Game::scale_position(Physics::Position const &p, double scale) {
     Physics::Position retval;
-    retval.x = p.x * scale + window->width()/2;
-    retval.y = p.y * scale + window->height()/2;
+    retval.x =  p.x * scale + window->width()/2;
+    retval.y = -p.y * scale + window->height()/2;
     return retval;
 }
