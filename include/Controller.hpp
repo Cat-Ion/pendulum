@@ -14,7 +14,8 @@ public:
           phimod += 2*M_PI;
       }
       phimod -= M_PI;
-      double u = x + 7.09 * dx - 342.965 * (phi-M_PI) - 420 * dphi;
+      double weights[4]={0.7071, 5.547, -314.4, -385.1};
+      double u = weights[0]*x + weights[1]*dx + weights[2]*phimod + weights[3]*dphi;
       printf("x:%6.3f dx:%6.3f phi:%6.3f dphi:%6.3f f:%10.3f\n", x, dx, phimod, dphi, u);
       fflush(stdout);
       return u;

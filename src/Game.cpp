@@ -20,9 +20,9 @@ void Game::run() {
             if(f > 15) f = 15;
             if(f < -15) f = -15;
             if(pressing_left && !pressing_right) {
-                physics.setForce(f-5);
+                physics.setForce(f-10);
             } else if(pressing_right && !pressing_left) {
-                physics.setForce(f+5);
+                physics.setForce(f+10);
             } else if(controller_on){
                 physics.setForce( f );
             } else {
