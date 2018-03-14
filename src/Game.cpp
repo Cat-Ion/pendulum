@@ -22,6 +22,7 @@ void Game::run() {
                 f = controller.force(
                         physics.ballAngle(0), physics.ballAngularVelocity(0),
                         physics.ballAngle(1), physics.ballAngularVelocity(1),
+                        physics.ballAngle(2), physics.ballAngularVelocity(2),
                         physics.sledX(), physics.sledVelocity() );
                 if(f > max_force) f = max_force;
                 if(f < -max_force) f = -max_force;
@@ -60,6 +61,7 @@ void Game::run() {
         Physics::Position sledPosition = physics.sledPosition();
         Physics::Position s0 = physics.ballPosition(0);
         Physics::Position s1 = physics.ballPosition(1);
+        Physics::Position s2 = physics.ballPosition(2);
         if(center) {
             s0.x -= sledPosition.x;
             s0.y -= sledPosition.y;
@@ -67,21 +69,27 @@ void Game::run() {
             s1.x -= sledPosition.x;
             s1.y -= sledPosition.y;
 
+            s2.x -= sledPosition.x;
+            s2.y -= sledPosition.y;
+
             sledPosition.x = sledPosition.y = 0;
         }
 
         sledPosition = scale_position(sledPosition, scale);
         s0 = scale_position(s0, scale);
         s1 = scale_position(s1, scale);
+        s2 = scale_position(s2, scale);
 
         window->draw_rectangle(sledPosition.x - cartLength/2*scale, sledPosition.y - cartLength/2*scale + 100, sledPosition.x + cartLength/2*scale, sledPosition.y + cartLength/2*scale + 100);
 
         window->draw_rectangle(sledPosition.x - cartLength/2*scale, sledPosition.y - cartLength/2*scale, sledPosition.x + cartLength/2*scale, sledPosition.y + cartLength/2*scale);
         window->draw_circle(s0.x, s0.y, ballRadius*scale);
         window->draw_circle(s1.x, s1.y, ballRadius*scale);
+        window->draw_circle(s2.x, s2.y, ballRadius*scale);
 
         window->draw_line(sledPosition.x, sledPosition.y, s0.x, s0.y);
         window->draw_line(s1.x, s1.y, s0.x, s0.y);
+        window->draw_line(s1.x, s1.y, s2.x, s2.y);
         window->draw();
     }
 }
@@ -96,6 +104,11 @@ void Game::handle_input() {
                 break;
             case SDLK_RIGHT:
                 pressing_right = e.key.state == SDL_PRESSED;
+                break;
+            case SDLK_c:
+                if(!e.key.repeat && e.key.state == SDL_PRESSED) {
+                    center = !center;
+                }
                 break;
             case SDLK_SPACE:
                 if(!e.key.repeat && e.key.state == SDL_PRESSED) {

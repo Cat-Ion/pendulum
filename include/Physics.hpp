@@ -16,6 +16,8 @@ public:
         Ball1Mass,
         Radius2,
         Ball2Mass,
+        Radius3,
+        Ball3Mass,
         SledMass,
         ForceX,
         ParCount
@@ -25,6 +27,8 @@ public:
         Ball1Velocity,
         Ball2Angle,
         Ball2Velocity,
+        Ball3Angle,
+        Ball3Velocity,
         SledPosition,
         SledVelocity,
         VarCount
