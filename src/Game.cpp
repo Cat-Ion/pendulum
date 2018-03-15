@@ -6,7 +6,7 @@ Game::Game(Window *w)
       pressing_left(false),
       pressing_right(false),
       controller_on(true),
-      running(false),
+      running(true),
       center(false)
 {
 }

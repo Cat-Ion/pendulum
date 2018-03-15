@@ -9,15 +9,15 @@ Physics::Physics()
 {
     setSled(0, 0);
 
-    setBall(0, 0.0, 0);
+    setBall(0, 0.04, 0);
     setRadius(0, 1);
     setBallMass(0, 0.3);
 
-    setBall(1, 0, 0);
+    setBall(1, 0.04, 0);
     setRadius(1, 1);
     setBallMass(1, 0.3);
 
-    setBall(2, 0, 0);
+    setBall(2, 0.04, 0);
     setRadius(2, 1);
     setBallMass(2, 0.3);
 
